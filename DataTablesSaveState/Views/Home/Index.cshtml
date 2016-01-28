@@ -5,36 +5,40 @@
 
 <form method="post" action="/Home/Index">
 
-    <table id="SampleTable">
+    <table id="SampleTable" class="table">
 
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Number</th>
                 <th>Name</th>
                 <th>Email Address</th>
                 <th>Telephone Number</th>
                 <th>Const 1</th>
                 <th>Const 2</th>
+                <th>ID</th>
+
             </tr>
         </thead>
         @foreach (var row in Model)
         {
             <tr>
-                <td>@row.ID</td>
+             
+                <td>@row.Number</td>
                 <td>@row.Name</td>
                 <td>@row.EmailAddress</td>
                 <td>@row.TelephoneNumber</td>
                 <td>@row.NumOne</td>
                 <td>@row.NumTwo</td>
+                <td>@row.ID</td>
             </tr>
 
         }
     </table>
 
-    <input  name="command" type="submit" value="Increment" />
-    <input  name="command" type="submit" value="Decrement" />
+    <button name="cNumber" type="submit" value="+20">Increment</button>
+    <button name="cNumber" type="submit" value="-20">Decrement</button>
 
-
+    <label> Selected Row <input type="number" value="" name="SelectedRow" id="SelectedRowInput" /></label>
 </form>
 
 @section scripts{
@@ -53,41 +57,63 @@
         var id = '@ViewBag.RowId';
 
         if (id == '') {
+            //if no row modified
 
             //create table
             $('#SampleTable').DataTable({
                 stateSave: true
             });
 
-            return;
+            return;            
         }
 
-        //otherwise, select the row
-        var modifiedRow = $('#SampleTable tr td:first-of-type').filter(function (ix, el) {
+        //otherwise, select the row, add class
+        var modifiedRow = $('#SampleTable tr td:last-of-type').filter(function (ix, el) {
             return el.innerText == id;
-        }).parent('tr').addClass('selectedRow');
+        }).parent('tr').addClass('modifiedRow');
 
 
+        // init table
         var table = $('#SampleTable').DataTable({
             stateSave: true
         });
 
         //move to row
-
         var numberOfRows = table.data().length;
         var rowsOnOnePage = table.page.len();
 
         if (rowsOnOnePage < numberOfRows) {
-            var selectedNode = table.row(".selectedRow").node();
+            var selectedNode = table.row(".modifiedRow").node();
             var nodePosition = table.rows({ order: 'current' }).nodes().indexOf(selectedNode);
             var pageNumber = Math.floor(nodePosition / rowsOnOnePage);
             table.page(pageNumber).draw(false); //move to page with the element
         }
 
-        //fade out color
+        //strip color after 5 seconds
         window.setTimeout(function () {
-            modifiedRow.removeClass('selectedRow');
+            modifiedRow.removeClass('modifiedRow');
         }, 5000);
+
+    });
+
+
+    /* allow select row */
+    $(document).ready(function () {
+        var table = $('#SampleTable').dataTable();
+
+        $('#SampleTable tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selectedRow')) {
+                $(this).removeClass('selectedRow');
+                $('#SelectedRowInput').val('');
+            }
+            else {
+                table.$('tr.selectedRow').removeClass('selectedRow');
+                $(this).addClass('selectedRow');
+
+                var text = $(this).find('td:last-of-type').html().trim();
+                $('#SelectedRowInput').val(text);
+            }
+        });
 
     });
 
@@ -100,15 +126,25 @@
 <style>
     tr {
         background-color:white;
-        -moz-transition: background-color ease 1s;
+    }
+
+    tr.selectedRow {
+        background-color:linen;
+    }
+
+    tr.modifiedRow {
+        background-color:mintcream;
+         -moz-transition: background-color ease 1s;
         -o-transition: background-color ease 1s;
         -webkit-transition: background-color ease 1s;
         transition: background-color ease 1s;
     }
 
-    tr.selectedRow {
-        background-color:gainsboro;
-    }
+    /* good accent colors for hillights ( high contrast with black text )
+        cornsilk
+        linen
+        mintcream
+    */
 
     
 </style>

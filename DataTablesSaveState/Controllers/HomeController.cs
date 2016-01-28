@@ -19,14 +19,16 @@ namespace DataTablesSaveState.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string command)
+        public ActionResult Index(int cNumber, int? selectedRow)
         {
-           
+            if (!selectedRow.HasValue)
+                throw new ArgumentNullException( nameof(selectedRow) +  " is null. A row must be selected");
+            
             var persons = PersonRepository.Persons;
-            var person = persons.OrderByDescending(t => t.ID).First();
-            person.ID = person.ID - 20;
-            person.NumOne = 0;
 
+            var person = persons.First( t => t.ID == selectedRow );
+
+            person.Number = person.Number + cNumber;
             ViewBag.RowId = person.ID;
 
             return View(persons);
