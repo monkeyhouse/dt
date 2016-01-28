@@ -1,0 +1,114 @@
+﻿@model IEnumerable<Models.Person>
+
+<br />
+<br />
+
+<form method="post" action="/Home/Index">
+
+    <table id="SampleTable">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email Address</th>
+                <th>Telephone Number</th>
+                <th>Const 1</th>
+                <th>Const 2</th>
+            </tr>
+        </thead>
+        @foreach (var row in Model)
+        {
+            <tr>
+                <td>@row.ID</td>
+                <td>@row.Name</td>
+                <td>@row.EmailAddress</td>
+                <td>@row.TelephoneNumber</td>
+                <td>@row.NumOne</td>
+                <td>@row.NumTwo</td>
+            </tr>
+
+        }
+    </table>
+
+    <input  name="command" type="submit" value="Increment" />
+    <input  name="command" type="submit" value="Decrement" />
+
+
+</form>
+
+@section scripts{
+<script src="~/Scripts/DataTables/jquery.dataTables.js"></script>
+<script src="~/Scripts/DataTables/dataTables.jqueryui.js"></script>
+
+<link href="~/Content/DataTables/css/dataTables.bootstrap.css" rel="stylesheet" />
+
+    
+<script>
+
+    $(document).ready(function () {
+
+        // if there was a row edited, then find by id, and go to it...
+
+        var id = '@ViewBag.RowId';
+
+        if (id == '') {
+
+            //create table
+            $('#SampleTable').DataTable({
+                stateSave: true
+            });
+
+            return;
+        }
+
+        //otherwise, select the row
+        var modifiedRow = $('#SampleTable tr td:first-of-type').filter(function (ix, el) {
+            return el.innerText == id;
+        }).parent('tr').addClass('selectedRow');
+
+
+        var table = $('#SampleTable').DataTable({
+            stateSave: true
+        });
+
+        //move to row
+
+        var numberOfRows = table.data().length;
+        var rowsOnOnePage = table.page.len();
+
+        if (rowsOnOnePage < numberOfRows) {
+            var selectedNode = table.row(".selectedRow").node();
+            var nodePosition = table.rows({ order: 'current' }).nodes().indexOf(selectedNode);
+            var pageNumber = Math.floor(nodePosition / rowsOnOnePage);
+            table.page(pageNumber).draw(false); //move to page with the element
+        }
+
+        //fade out color
+        window.setTimeout(function () {
+            modifiedRow.removeClass('selectedRow');
+        }, 5000);
+
+    });
+
+
+
+</script>
+
+}
+
+<style>
+    tr {
+        background-color:white;
+        -moz-transition: background-color ease 1s;
+        -o-transition: background-color ease 1s;
+        -webkit-transition: background-color ease 1s;
+        transition: background-color ease 1s;
+    }
+
+    tr.selectedRow {
+        background-color:gainsboro;
+    }
+
+    
+</style>
